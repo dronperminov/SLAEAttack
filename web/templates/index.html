@@ -14,9 +14,11 @@
 
                 <div class="label">Первое изображение</div>
                 <div class="input-image" onclick="SelectImage('input')">
-                    <img id="input-image">
+                    <img class="full-size-image" id="input-image">
+                    <img class="real-size-image" id="input-real-image">
                 </div>
                 <div class="error" id="input-error"></div>
+                <div class="prediction-bar-chart hidden"><svg id="input-barchart"></svg></div>
                 <div class="prediction" id="input-prediction"></div>
             </div>
 
@@ -25,17 +27,21 @@
 
                 <div class="label">Второе изображение</div>
                 <div class="input-image" onclick="SelectImage('target')">
-                    <img id="target-image">
+                    <img class="full-size-image" id="target-image">
+                    <img class="real-size-image" id="target-real-image">
                 </div>
                 <div class="error" id="target-error"></div>
+                <div class="prediction-bar-chart hidden"><svg id="target-barchart"></svg></div>
                 <div class="prediction" id="target-prediction"></div>
             </div>
 
             <div class="image-block">
                 <div class="label">Атакующее изображение</div>
                 <div class="input-image">
-                    <img id="attack-image">
+                    <img class="full-size-image" id="attack-image">
+                    <img class="real-size-image" id="attack-real-image">
                 </div>
+                <div class="prediction-bar-chart hidden"><svg id="attack-barchart"></svg></div>
                 <div class="prediction" id="attack-prediction"></div>
             </div>
         </div>
@@ -47,6 +53,7 @@
     </div>
 
     <script src="/js/fetch.js?v={{version}}"></script>
+    <script src="/js/bar_chart.js?v={{version}}"></script>
     <script src="/js/ui.js?v={{version}}"></script>
 </body>
 </html>

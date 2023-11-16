@@ -37,16 +37,41 @@ function ShowVector(vector, withMax = false) {
     return vector.join(", ")
 }
 
-function ShowPrediction(block, prediction) {
-    let html = [
-        `<b>Выход сети:</b> ${ShowVector(prediction.output, true)}`,
-        `<b>Выход первого слоя:</b> ${ShowVector(prediction.first_layer)}`
-    ]
-    block.innerHTML = html.join("<br>")
+function Softmax(vector) {
+    let sum = 0
+    let result = []
+
+    for (let i = 0; i < vector.length; i++) {
+        result.push(Math.exp(vector[i]))
+        sum += result[i]
+    }
+
+    for (let i = 0; i < vector.length; i++)
+        result[i] /= sum
+
+    return result
+}
+
+function ShowPrediction(image, block, prediction, name) {
+    let imageFullSize = document.getElementById(`${name}-image`)
+    imageFullSize.src  = `data:image/jpeg;base64,${image}`
+
+    let imageRealSize = document.getElementById(`${name}-real-image`)
+    imageRealSize.src  = `data:image/jpeg;base64,${image}`
+
+    block.innerHTML = `
+        <div class="text"><b>Выход сети:</b> ${ShowVector(prediction.output, true)}</div>
+        <div class="text"><b>Выход первого слоя:</b> ${ShowVector(prediction.first_layer)}</div>
+    `
+
+    let svg = document.getElementById(`${name}-barchart`)
+    svg.parentNode.classList.remove("hidden")
+
+    let barChart = new BarChart(svg)
+    barChart.Plot(Softmax(prediction.output))
 }
 
 function Predict(name) {
-    let image = document.getElementById(`${name}-image`)
     let input = document.getElementById(`${name}-file`)
     let prediction = document.getElementById(`${name}-prediction`)
     let error = document.getElementById(`${name}-error`)
@@ -61,14 +86,14 @@ function Predict(name) {
             return
         }
 
-        image.src  = `data:image/jpeg;base64,${response.image}`
-        ShowPrediction(prediction, response.prediction)
+        ShowPrediction(response.image, prediction, response.prediction, name)
         ShowAttackButton()
     })
 }
 
 function Attack() {
     let image = document.getElementById("attack-image")
+    let imageRealSize = document.getElementById("attack-real-image")
     let prediction = document.getElementById("attack-prediction")
     let error = document.getElementById("error")
     error.innerText = ""
@@ -83,7 +108,6 @@ function Attack() {
             return
         }
 
-        image.src  = `data:image/jpeg;base64,${response.image}`
-        ShowPrediction(prediction, response.prediction)
+        ShowPrediction(response.image, prediction, response.prediction, "attack")
     })
 }
