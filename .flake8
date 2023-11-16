@@ -1,0 +1,13 @@
+[flake8]
+
+max-line-length = 170
+max-complexity = 20
+inline-quotes = "
+
+application-import-names = src, config
+import-order-style = pycharm
+
+extend-immutable-calls = File
+
+exclude = .git, __pycache__, .idea
+ignore = ANN101

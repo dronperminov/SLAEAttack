@@ -2,11 +2,11 @@ import numpy as np
 import torch
 from qpsolvers import solve_qp
 
-from src import DenseNetwork
+from src.dense_network import DenseNetwork
 
 
 class SLAEAttack:
-    def __init__(self, model: DenseNetwork, image_width: int, image_height: int, image_depth: int):
+    def __init__(self, model: DenseNetwork, image_width: int, image_height: int, image_depth: int) -> None:
         self.image_width = image_width
         self.image_height = image_height
         self.image_depth = image_depth

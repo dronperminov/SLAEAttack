@@ -3,11 +3,11 @@ from typing import Set, Tuple
 
 import torch
 import torch.utils.data as data_utils
-from torchvision import datasets
+from torchvision import datasets, transforms
 
 
 class Dataset:
-    def __init__(self, config: dict, transform):
+    def __init__(self, config: dict, transform: transforms) -> None:
         self.dataset_name = config['name']
         self.class_names = config['class_names']
         self.img_w, self.img_h, self.img_d = config['img_w'], config['img_h'], config.get('img_d', 1)
@@ -81,7 +81,7 @@ class Dataset:
         min_count = min(len(indices) for indices in target2count.values())
         indices = []
 
-        for target, target_indices in target2count.items():
+        for target_indices in target2count.values():
             indices.extend(target_indices[:min_count])
 
         indices.sort()

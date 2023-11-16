@@ -1,5 +1,5 @@
 import torch
-import torch.nn.functional as F
+import torch.nn.functional
 import torch.optim as optim
 import torch.utils.data as data_utils
 from torchvision import transforms
@@ -9,13 +9,13 @@ from src.dataset import Dataset
 from src.dense_network import DenseNetwork
 
 
-def train_model(model: DenseNetwork, data_loader: data_utils.DataLoader, optimizer: torch.optim.Optimizer, device: torch.device):
+def train_model(model: DenseNetwork, data_loader: data_utils.DataLoader, optimizer: torch.optim.Optimizer, device: torch.device) -> None:
     model.train()
 
     for data, target in data_loader:
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
-        loss = F.mse_loss(model(data), torch.unsqueeze(target, dim=-1))
+        loss = torch.nn.functional.mse_loss(model(data), torch.unsqueeze(target, dim=-1))
         loss.backward()
         optimizer.step()
 
@@ -33,7 +33,7 @@ def evaluate(model: DenseNetwork, data_loader: data_utils.DataLoader, device: to
             output[output < 0] = -1
             output[output >= 0] = 1
 
-            loss += F.mse_loss(output, target, reduction='sum').item()
+            loss += torch.nn.functional.mse_loss(output, target, reduction='sum').item()
             error += (output != target).sum().item()
 
     loss /= total
@@ -42,7 +42,7 @@ def evaluate(model: DenseNetwork, data_loader: data_utils.DataLoader, device: to
     print(f'    {label:>6}: loss: {loss:.4f}, error: {error:.3%}')
 
 
-def main():
+def main() -> None:
     batch_size = 32
     learning_rate = 0.001
     epochs = 10

@@ -1,18 +1,21 @@
-import base64
-
 import cv2
-import numpy as np
 import torch
-import torchvision.transforms as transforms
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from jinja2 import Environment, FileSystemLoader
 
-from src import attack_method
+import config
+from src.attack import SLAEAttack
+from src.dense_network import DenseNetwork
 from src.utils import get_static_hash, numpy2base64, resize_image, save_image
 
 router = APIRouter()
 templates = Environment(loader=FileSystemLoader("web/templates"), cache_size=0)
+
+device = torch.device("cuda")
+model = DenseNetwork(config.INPUT_SIZE, config.SIZES, config.ACTIVATION).to(device)
+model.load("models/model_epoch10.pth")
+attack_method = SLAEAttack(model, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.IMAGE_DEPTH)
 
 
 @router.get("/")

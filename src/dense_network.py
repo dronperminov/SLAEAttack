@@ -2,11 +2,11 @@ from typing import List
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional
 
 
 class DenseNetwork(nn.Module):
-    def __init__(self, inputs: int, sizes: List[int], activation_name: str = "relu"):
+    def __init__(self, inputs: int, sizes: List[int], activation_name: str = "relu") -> None:
         super(DenseNetwork, self).__init__()
         self.inputs = inputs
         self.activation_name = activation_name
@@ -21,12 +21,12 @@ class DenseNetwork(nn.Module):
             self.layers.append(nn.Linear(inputs, layer_size))
             inputs = layer_size
 
-    def __get_activation(self, activation: str):
+    def __get_activation(self, activation: str) -> torch.nn.functional:
         if activation == "relu":
-            return F.relu
+            return torch.nn.functional.relu
 
         if activation == "leaky-relu":
-            return F.leaky_relu
+            return torch.nn.functional.leaky_relu
 
         if activation == "abs":
             return torch.abs
@@ -41,8 +41,8 @@ class DenseNetwork(nn.Module):
 
         return self.layers[-1](x)
 
-    def save(self, path: str):
+    def save(self, path: str) -> None:
         torch.save(self.state_dict(), path)
 
-    def load(self, path: str):
+    def load(self, path: str) -> None:
         self.load_state_dict(torch.load(path))
