@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/styles/styles.css?v={{version}}">
+    <title>СЛАУ атака на персептрон</title>
+</head>
+<body>
+    <div class="content">
+        <div class="images">
+            <div class="image-block">
+                <input class="image-file-input" type="file" id="input-file" onchange="Predict('input')" accept="image/png, image/gif, image/jpeg">
+
+                <div class="label">Первое изображение</div>
+                <div class="input-image" onclick="SelectImage('input')">
+                    <img id="input-image">
+                </div>
+                <div class="error" id="input-error"></div>
+                <div class="prediction" id="input-prediction"></div>
+            </div>
+
+            <div class="image-block">
+                <input class="image-file-input" type="file" id="target-file" onchange="Predict('target')" accept="image/png, image/gif, image/jpeg">
+
+                <div class="label">Второе изображение</div>
+                <div class="input-image" onclick="SelectImage('target')">
+                    <img id="target-image">
+                </div>
+                <div class="error" id="target-error"></div>
+                <div class="prediction" id="target-prediction"></div>
+            </div>
+
+            <div class="image-block">
+                <div class="label">Атакующее изображение</div>
+                <div class="input-image">
+                    <img id="attack-image">
+                </div>
+                <div class="prediction" id="attack-prediction"></div>
+            </div>
+        </div>
+
+        <div class="controls hidden" id="controls">
+            <button onclick="Attack()">Атаковать</button>
+        </div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script src="/js/fetch.js?v={{version}}"></script>
+    <script src="/js/ui.js?v={{version}}"></script>
+</body>
+</html>
