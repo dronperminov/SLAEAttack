@@ -1,25 +1,16 @@
-from typing import List
+from abc import abstractmethod
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional
 
 
-class DenseNetwork(nn.Module):
-    def __init__(self, inputs: int, sizes: List[int], activation_name: str = "relu") -> None:
-        super(DenseNetwork, self).__init__()
-        self.inputs = inputs
+class Network(nn.Module):
+    def __init__(self, activation_name: str = "relu") -> None:
+        super(Network, self).__init__()
         self.activation_name = activation_name
         self.activation = self.__get_activation(activation_name)
-        self.__init_layers(sizes)
-
-    def __init_layers(self, sizes: List[int]) -> None:
-        self.layers = nn.ModuleList()
-        inputs = self.inputs
-
-        for layer_size in sizes:
-            self.layers.append(nn.Linear(inputs, layer_size))
-            inputs = layer_size
 
     def __get_activation(self, activation: str) -> torch.nn.functional:
         if activation == "relu":
@@ -33,13 +24,13 @@ class DenseNetwork(nn.Module):
 
         raise ValueError(f"Invalid activation '{activation}'")
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = torch.flatten(x, 1)
+    @abstractmethod
+    def forward_first_layer(self, x: torch.Tensor) -> torch.Tensor:
+        pass
 
-        for layer in self.layers[:-1]:
-            x = self.activation(layer(x))
-
-        return self.layers[-1](x)
+    @abstractmethod
+    def get_slae(self, x: torch.tensor, to_numpy: bool) -> Tuple[torch.tensor, torch.tensor]:
+        pass
 
     def save(self, path: str) -> None:
         torch.save(self.state_dict(), path)

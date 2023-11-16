@@ -6,15 +6,14 @@ from jinja2 import Environment, FileSystemLoader
 
 import config
 from src.attack import SLAEAttack
-from src.dense_network import DenseNetwork
-from src.utils import get_static_hash, numpy2base64, resize_image, save_image
+from src.utils import get_model, get_model_name, get_static_hash, numpy2base64, resize_image, save_image
 
 router = APIRouter()
 templates = Environment(loader=FileSystemLoader("web/templates"), cache_size=0)
 
 device = torch.device("cuda")
-model = DenseNetwork(config.INPUT_SIZE, config.SIZES, config.ACTIVATION).to(device)
-model.load(f'models/{config.DATASET}_{"-".join(str(size) for size in config.SIZES)}.pth')
+model = get_model().to(device)
+model.load(f'models/{get_model_name()}.pth')
 attack_method = SLAEAttack(model, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.IMAGE_DEPTH)
 
 

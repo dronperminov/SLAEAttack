@@ -114,8 +114,9 @@ body {
 }
 
 .controls {
-    border-top: 1px solid #000;
-    padding: 10px 10px 0 10px;
+    border-bottom: 1px solid #000;
+    margin-bottom: 10px;
+    padding: 10px;
     text-align: center;
     font-size: 18px;
 }

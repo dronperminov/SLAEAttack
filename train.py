@@ -6,10 +6,11 @@ from torchvision import transforms
 
 import config
 from src.dataset import Dataset
-from src.dense_network import DenseNetwork
+from src.networks.network import Network
+from src.utils import get_model, get_model_name
 
 
-def train_model(model: DenseNetwork, data_loader: data_utils.DataLoader, optimizer: torch.optim.Optimizer, device: torch.device) -> None:
+def train_model(model: Network, data_loader: data_utils.DataLoader, optimizer: torch.optim.Optimizer, device: torch.device) -> None:
     criterion = torch.nn.CrossEntropyLoss()
     model.train()
 
@@ -17,12 +18,12 @@ def train_model(model: DenseNetwork, data_loader: data_utils.DataLoader, optimiz
         data, labels = data.to(device), labels.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = criterion(torch.softmax(output, 1), labels)
+        loss = criterion(output, labels)
         loss.backward()
         optimizer.step()
 
 
-def evaluate(model: DenseNetwork, data_loader: data_utils.DataLoader, device: torch.device, label: str) -> None:
+def evaluate(model: Network, data_loader: data_utils.DataLoader, device: torch.device, label: str) -> None:
     loss, error, total = 0, 0, 0
     criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     model.eval()
@@ -64,7 +65,7 @@ def main() -> None:
         "test": torch.utils.data.DataLoader(dataset.test_dataset, **dataloader_args)
     }
 
-    model = DenseNetwork(dataset.flat_size(), config.SIZES, config.ACTIVATION).to(device)
+    model = get_model().to(device)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
@@ -73,7 +74,7 @@ def main() -> None:
         print(f"\nEpoch {epoch}:")
         evaluate(model, data_loaders["train"], device, "train")
         evaluate(model, data_loaders["test"], device, "test")
-        model.save(f'models/{config.DATASET}_{"-".join(str(size) for size in config.SIZES)}.pth')
+        model.save(f'models/{get_model_name()}.pth')
 
 
 if __name__ == '__main__':

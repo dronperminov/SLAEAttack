@@ -9,6 +9,9 @@ import numpy as np
 from fastapi import UploadFile
 
 import config
+from src.networks.conv_network import ConvNetwork
+from src.networks.dense_network import DenseNetwork
+from src.networks.network import Network
 
 
 def get_hash(filename: str) -> str:
@@ -79,3 +82,23 @@ def numpy2base64(image: np.ndarray) -> str:
     image = (image * 255).astype(np.uint8)
     _, encoded_image = cv2.imencode(".jpg", image)
     return base64.b64encode(encoded_image).decode("utf-8")
+
+
+def get_model_name() -> str:
+    name = [config.DATASET]
+
+    if config.MODEL_TYPE == "conv" and config.CONV_PARAMS:
+        name.append("-".join(f'{param["filters"]}f{param["fs"]}P{param["padding"]}S{param["stride"]}' for param in config.CONV_PARAMS))
+
+    name.append("-".join(str(size) for size in config.SIZES))
+    return "_".join(name)
+
+
+def get_model() -> Network:
+    if config.MODEL_TYPE == "dense":
+        return DenseNetwork(config.IMAGE_WIDTH * config.IMAGE_HEIGHT * config.IMAGE_DEPTH, config.SIZES, config.ACTIVATION)
+
+    if config.MODEL_TYPE == "conv":
+        return ConvNetwork(config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.IMAGE_DEPTH, config.CONV_PARAMS, config.SIZES, config.ACTIVATION)
+
+    raise ValueError(f'Unknown model type "{config.MODEL_TYPE}"')

@@ -14,25 +14,8 @@ function ShowAttackButton() {
         controls.classList.add("hidden")
 }
 
-function ShowVector(vector, withMax = false) {
+function ShowVector(vector) {
     vector = vector.map(v => `${Math.round(v * 10000) / 10000}`)
-
-    if (withMax) {
-        let imax = 0
-        let imin = 0
-
-        for (let i = 1; i < vector.length; i++) {
-            if (vector[i] > vector[imax])
-                imax = i
-
-            if (vector[i] < vector[imin])
-                imin = i
-        }
-
-        vector[imin] = `<span class="argmin">${vector[imin]}</span>`
-        vector[imax] = `<span class="argmax">${vector[imax]}</span>`
-    }
-
     return vector.join(", ")
 }
 
@@ -59,7 +42,7 @@ function ShowPrediction(image, block, prediction, name) {
     imageRealSize.src  = `data:image/jpeg;base64,${image}`
 
     block.innerHTML = `
-        <div class="text"><b>Выход сети:</b> ${ShowVector(prediction.output, true)}</div>
+        <div class="text"><b>Выход сети:</b> ${ShowVector(prediction.output)}</div>
         <div class="text"><b>Выход первого слоя:</b> ${ShowVector(prediction.first_layer)}</div>
     `
 

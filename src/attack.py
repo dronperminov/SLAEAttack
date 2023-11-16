@@ -4,11 +4,11 @@ from qpsolvers import solve_qp
 
 import config
 from src.dataset import DATASET_TO_CLASS_NAMES
-from src.dense_network import DenseNetwork
+from src.networks.network import Network
 
 
 class SLAEAttack:
-    def __init__(self, model: DenseNetwork, image_width: int, image_height: int, image_depth: int) -> None:
+    def __init__(self, model: Network, image_width: int, image_height: int, image_depth: int) -> None:
         self.image_width = image_width
         self.image_height = image_height
         self.image_depth = image_depth
@@ -41,7 +41,7 @@ class SLAEAttack:
 
     def predict(self, image: np.ndarray) -> dict:
         torch_input = torch.unsqueeze(self.numpy2tensor(image), 0)
-        first_layer = self.model.layers[0](torch.flatten(torch_input, 1))[0].detach().cpu().numpy().tolist()
+        first_layer = torch.flatten(self.model.forward_first_layer(torch_input)[0], 0).detach().cpu().numpy().tolist()
         output = self.model(torch_input)[0].detach().cpu().numpy().tolist()
         return {
             "class_names": DATASET_TO_CLASS_NAMES[config.DATASET],
@@ -50,11 +50,10 @@ class SLAEAttack:
         }
 
     def attack(self, input_image: np.ndarray, target_image: np.ndarray, scale: float) -> np.ndarray:
-        image_tensor = torch.unsqueeze(self.numpy2tensor(input_image), 0)
+        image_tensor = self.numpy2tensor(input_image)
         target_vector = self.numpy2vector(target_image)
 
-        b = (self.model.layers[0](torch.flatten(image_tensor, 1))[0] - self.model.layers[0].bias).cpu().detach().numpy().astype(np.float64)
-        matrix = self.model.layers[0].weight.cpu().detach().numpy().astype(np.float64)
+        matrix, b = self.model.get_slae(image_tensor, to_numpy=True)
 
         lb = np.zeros(self.size, dtype=np.float64)
         ub = np.ones(self.size, dtype=np.float64)

@@ -32,8 +32,8 @@ class Dataset:
         else:
             raise ValueError(f'Unknown dataset name "{self.dataset_name}"')
 
-        train_data, train_targets = torch.tensor(train_dataset.data) / 255.0, torch.tensor(train_dataset.targets)
-        test_data, test_targets = torch.tensor(test_dataset.data) / 255.0, torch.tensor(test_dataset.targets)
+        train_data, train_targets = train_dataset.data / 255.0, train_dataset.targets
+        test_data, test_targets = test_dataset.data / 255.0, test_dataset.targets
 
         if isinstance(train_data, list):
             train_data, train_targets = torch.tensor(train_data), torch.tensor(train_targets)
