@@ -15,14 +15,32 @@ function ShowAttackButton() {
         controls.classList.add("hidden")
 }
 
-function RoundVector(vector) {
-    return vector.map(v => Math.round(v * 10000) / 10000)
+function ShowVector(vector, withMax = false) {
+    vector = vector.map(v => `${Math.round(v * 10000) / 10000}`)
+
+    if (withMax) {
+        let imax = 0
+        let imin = 0
+
+        for (let i = 1; i < vector.length; i++) {
+            if (vector[i] > vector[imax])
+                imax = i
+
+            if (vector[i] < vector[imin])
+                imin = i
+        }
+
+        vector[imin] = `<span class="argmin">${vector[imin]}</span>`
+        vector[imax] = `<span class="argmax">${vector[imax]}</span>`
+    }
+
+    return vector.join(", ")
 }
 
 function ShowPrediction(block, prediction) {
     let html = [
-        `<b>Выход сети:</b> ${RoundVector(prediction.output).join(", ")}`,
-        `<b>Выход первого слоя:</b> ${RoundVector(prediction.first_layer).join(", ")}`
+        `<b>Выход сети:</b> ${ShowVector(prediction.output, true)}`,
+        `<b>Выход первого слоя:</b> ${ShowVector(prediction.first_layer)}`
     ]
     block.innerHTML = html.join("<br>")
 }

@@ -17,6 +17,14 @@ body {
     color: #f44336;
 }
 
+.argmin {
+    color: #0f0;
+}
+
+.argmax {
+    color: #f44336;
+}
+
 .content {
     border: 1px solid #000;
     border-radius: 10px;

@@ -31,11 +31,11 @@ class SLAEAttack:
     def attack(self, input_image: np.ndarray, target_image: np.ndarray) -> np.ndarray:
         image_tensor = self.numpy2tensor(input_image)
 
-        bias = (self.model.layers[0](torch.flatten(image_tensor, 1)) - self.model.layers[0].bias).cpu().detach().numpy()
+        b = (self.model.layers[0](torch.flatten(image_tensor, 1)) - self.model.layers[0].bias).cpu().detach().numpy()
         matrix = self.model.layers[0].weight.cpu().detach().numpy()
         x_t = solve_qp(
             P=np.eye(self.size, self.size).astype(np.float64), q=-target_image.reshape(self.size).astype(np.float64),
-            A=matrix.astype(np.float64), b=bias.astype(np.float64),
+            A=matrix.astype(np.float64), b=b.astype(np.float64),
             lb=np.zeros(self.size).astype(np.float64), ub=np.ones(self.size).astype(np.float64),
             solver='ecos'
         )

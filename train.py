@@ -10,31 +10,32 @@ from src.dense_network import DenseNetwork
 
 
 def train_model(model: DenseNetwork, data_loader: data_utils.DataLoader, optimizer: torch.optim.Optimizer, device: torch.device) -> None:
+    criterion = torch.nn.CrossEntropyLoss()
     model.train()
 
-    for data, target in data_loader:
-        data, target = data.to(device), target.to(device)
+    for data, labels in data_loader:
+        data, labels = data.to(device), labels.to(device)
         optimizer.zero_grad()
-        loss = torch.nn.functional.mse_loss(model(data), torch.unsqueeze(target, dim=-1))
+        output = model(data)
+        loss = criterion(output, labels)
         loss.backward()
         optimizer.step()
 
 
 def evaluate(model: DenseNetwork, data_loader: data_utils.DataLoader, device: torch.device, label: str) -> None:
+    loss, error, total = 0, 0, 0
+    criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     model.eval()
-    loss = 0
-    error = 0
-    total = len(data_loader.dataset)
 
     with torch.no_grad():
-        for data, target in data_loader:
-            data, target = data.to(device), target.to(device)
-            output = torch.squeeze(model(data))
-            output[output < 0] = -1
-            output[output >= 0] = 1
+        for data, labels in data_loader:
+            data, labels = data.to(device), labels.to(device)
+            output = model(data)
+            predicted = torch.argmax(output, 1)
 
-            loss += torch.nn.functional.mse_loss(output, target, reduction='sum').item()
-            error += (output != target).sum().item()
+            loss += criterion(output, labels)
+            error += (predicted != labels).sum().item()
+            total += labels.shape[0]
 
     loss /= total
     error /= total
@@ -50,20 +51,12 @@ def main() -> None:
 
     dataset = Dataset({
         "name": config.DATASET,
-        "class_names": {-1: "seven", 1: "other"},
-        "exclude_classes": {},
-        "class_map": {-1.0: [7], 1.0: [0, 1, 2, 3, 4, 5, 6, 8, 9]},
-        "balanced": True,
-        "img_w": 28,
-        "img_h": 28
+        "class_names": {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9},
+        "img_w": config.IMAGE_WIDTH,
+        "img_h": config.IMAGE_HEIGHT
     }, transforms.ToTensor())
 
-    dataloader_args = {
-        'batch_size': batch_size,
-        'num_workers': 1,
-        'pin_memory': True,
-        'shuffle': True
-    }
+    dataloader_args = {'batch_size': batch_size, 'num_workers': 1, 'pin_memory': True, 'shuffle': True}
 
     data_loaders = {
         "train": torch.utils.data.DataLoader(dataset.train_dataset, **dataloader_args),
