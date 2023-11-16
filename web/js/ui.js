@@ -53,6 +53,16 @@ function ShowPrediction(image, block, prediction, name) {
     barChart.Plot(Softmax(prediction.output), prediction.class_names)
 }
 
+function ChangeMethod() {
+    let method = document.getElementById("method").value
+    let scaleBlock = document.getElementById("scale-block")
+
+    if (method == "qp")
+        scaleBlock.classList.remove("hidden")
+    else
+        scaleBlock.classList.add("hidden")
+}
+
 function Predict(name) {
     let input = document.getElementById(`${name}-file`)
     let prediction = document.getElementById(`${name}-prediction`)
@@ -77,7 +87,8 @@ function Attack() {
     let image = document.getElementById("attack-image")
     let imageRealSize = document.getElementById("attack-real-image")
     let prediction = document.getElementById("attack-prediction")
-    let scale = +document.getElementById("scale-box").value
+    let method = document.getElementById("method").value
+    let scale = +document.getElementById("scale").value
     let error = document.getElementById("error")
     error.innerText = ""
 
@@ -85,6 +96,7 @@ function Attack() {
     data.append("input_image", document.getElementById("input-file").files[0])
     data.append("target_image", document.getElementById("target-file").files[0])
     data.append("scale", scale)
+    data.append("method", method)
 
     SendRequest("/attack", data).then(response => {
         if (response.status != "success") {

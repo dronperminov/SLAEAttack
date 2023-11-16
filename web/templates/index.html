@@ -9,15 +9,20 @@
 </head>
 <body>
     <div class="content">
-        <div class="controls hidde" id="controls">
+        <div class="controls hidden" id="controls">
             <h2>Атака</h2>
             <div class="form-row">
-                <label>Вид атаки: <select>
-                    <option value="qp-solver" selected>QP решатель</option>
-                    <option value="slae">СЛАУ</option>
+                <label>Вид атаки: <select id="method" onchange="ChangeMethod()">
+                    <option value="qp" selected>QP решатель</option>
+                    <option value="split_matrix">СЛАУ</option>
                 </select></label>
+
             </div>
-            <input type="range" min="0" max="1" step="0.01" value="0.5" id="scale-box" onchange="Attack()"> <button onclick="Attack()">Атаковать</button>
+            <div class="form-row" id="scale-block">
+                <label>Доля совпадающих пикселей: <input type="range" min="0" max="1" step="0.01" value="0.5" id="scale" onchange="Attack()"></label>
+            </div>
+
+            <button onclick="Attack()">Атаковать</button>
         </div>
         <div class="error" id="error"></div>
 

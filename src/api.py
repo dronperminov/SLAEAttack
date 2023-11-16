@@ -37,10 +37,16 @@ def predict(image: UploadFile = File(...)) -> JSONResponse:
 
 
 @router.post("/attack")
-def attack(input_image: UploadFile = File(...), target_image: UploadFile = File(...), scale: float = Form(...)) -> JSONResponse:
+def attack(input_image: UploadFile = File(...), target_image: UploadFile = File(...), method: str = Form(...), scale: float = Form(...)) -> JSONResponse:
     input_image = resize_image(save_image(input_image))
     target_image = resize_image(save_image(target_image))
-    attacked_image = attack_method.attack(input_image, target_image, scale)
+
+    if method == "qp":
+        attacked_image = attack_method.qp_attack(input_image, target_image, scale)
+    elif method == "split_matrix":
+        attacked_image = attack_method.split_matrix_attack(input_image, target_image)
+    else:
+        return JSONResponse({"status": "error", "message": f'unknown method "{method}"'})
 
     return JSONResponse({
         "status": "success",

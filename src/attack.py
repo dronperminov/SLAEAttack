@@ -49,7 +49,7 @@ class SLAEAttack:
             "output": output
         }
 
-    def attack(self, input_image: np.ndarray, target_image: np.ndarray, scale: float) -> np.ndarray:
+    def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, scale: float) -> np.ndarray:
         image_tensor = self.numpy2tensor(input_image)
         target_vector = self.numpy2vector(target_image)
 
@@ -72,3 +72,16 @@ class SLAEAttack:
 
         print(np.min(attacked_image), np.max(attacked_image))
         return self.vector2numpy(attacked_image)
+
+    def split_matrix_attack(self, input_image: np.ndarray, target_image: np.ndarray) -> np.ndarray:
+        input_tensor = self.numpy2tensor(input_image)
+        matrix, b = self.model.get_slae(input_tensor, to_numpy=True)
+
+        indices = np.random.choice(range(matrix.shape[1]), matrix.shape[0], replace=False)
+        other_indices = np.array([i for i in range(matrix.shape[1]) if i not in indices])
+
+        x = self.numpy2vector(target_image)
+        x_changed = np.linalg.solve(matrix[:, indices], (b.T - np.matmul(matrix[:, other_indices], x[other_indices])))
+        x[indices] = x_changed
+        print(x_changed)
+        return self.vector2numpy(x)
