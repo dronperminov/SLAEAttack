@@ -1,0 +1,81 @@
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="range"],
+select {
+    box-sizing: border-box;
+    border: none;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0;
+    background: transparent;
+    font-size: 0.9rem;
+    font-family: Roboto;
+}
+
+input[type="text"]:focus, input[type="text"]:hover,
+input[type="password"]:focus, input[type="password"]:hover,
+input[type="range"]:focus, input[type="range"]:hover,
+input[type="number"]:focus, input[type="number"]:hover,
+select:focus, select:hover,
+.input:focus, .input:hover {
+    outline: none;
+    border-bottom: 1px solid var(--main-color);
+}
+
+input[type="text"]:disabled,
+input[type="number"]:disabled,
+input[type="range"]:disabled,
+select:disabled {
+    color: var(--disabled-color);
+    border-color: var(--border-color);
+}
+
+input[type="file"] {
+    display: none;
+}
+
+button {
+    background: var(--button-background);
+    border: 1px solid var(--button-border-color);
+    color: 1px solid var(--button-color);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    font-family: Roboto;
+    cursor: pointer;
+}
+
+button.full-width {
+    width: 100%;
+}
+
+button:hover {
+    background: var(--button-hover-background);
+    border-color: var(--button-hover-border-color);
+    color: var(--button-hover-color);
+}
+
+button:disabled {
+    border: 1px solid var(--disabled-color);
+    color: var(--disabled-color);
+    background: none;
+    cursor: default;
+}
+
+input[type="number"].half {
+    width: 50%;
+}
+
+select.auto {
+    width: auto;
+}
+
+.range-label {
+    text-align: center;
+    font-size: 0.8em;
+}
+
+input.percent {
+    width: calc(100% - 20px);
+}

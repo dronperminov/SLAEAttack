@@ -53,8 +53,8 @@ def get_static_hash() -> str:
 
 def save_image(image: UploadFile) -> np.ndarray:
     with tempfile.TemporaryDirectory() as tmp_dir:
-        file_name = image.filename.split("/")[-1]
-        file_path = os.path.join(tmp_dir, file_name)
+        extension = image.filename.split(".")[-1]
+        file_path = os.path.join(tmp_dir, f"image.{extension}")
 
         try:
             with open(file_path, "wb") as buffer:

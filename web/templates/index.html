@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/styles/inputs.css?v={{version}}">
     <link rel="stylesheet" type="text/css" href="/styles/styles.css?v={{version}}">
     <title>СЛАУ атака на персептрон</title>
 </head>
@@ -12,7 +13,7 @@
             <div class="image-block">
                 <input class="image-file-input" type="file" id="input-file" onchange="Predict('input')" accept="image/png, image/gif, image/jpeg">
 
-                <div class="label">Первое изображение</div>
+                <div class="label">Входное изображение</div>
                 <div class="input-image" onclick="SelectImage('input')">
                     <img class="full-size-image" id="input-image">
                     <img class="real-size-image" id="input-real-image">
@@ -25,7 +26,7 @@
             <div class="image-block">
                 <input class="image-file-input" type="file" id="target-file" onchange="Predict('target')" accept="image/png, image/gif, image/jpeg">
 
-                <div class="label">Второе изображение</div>
+                <div class="label">Целевое изображение</div>
                 <div class="input-image" onclick="SelectImage('target')">
                     <img class="full-size-image" id="target-image">
                     <img class="real-size-image" id="target-real-image">
@@ -46,8 +47,15 @@
             </div>
         </div>
 
-        <div class="controls hidden" id="controls">
-            <button onclick="Attack()">Атаковать</button>
+        <div class="controls hidde" id="controls">
+            <h2>Атака</h2>
+            <div class="form-row">
+                <label>Вид атаки: <select>
+                    <option value="qp-solver" selected>QP решатель</option>
+                    <option value="slae">СЛАУ</option>
+                </select></label>
+            </div>
+            <input type="range" min="0" max="1" step="0.01" value="0.5" id="scale-box" onchange="Attack()"> <button onclick="Attack()">Атаковать</button>
         </div>
         <div class="error" id="error"></div>
     </div>

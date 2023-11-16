@@ -1,15 +1,23 @@
+import os
 from collections import defaultdict
 from typing import Set, Tuple
 
 import torch
 import torch.utils.data as data_utils
 from torchvision import datasets, transforms
+from torchvision.utils import save_image
+
+
+DATASET_TO_CLASS_NAMES = {
+    "mnist": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+    "fashion-mnist": ["T-shirt", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"],
+    "cifar10": ["plane", "car", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+}
 
 
 class Dataset:
     def __init__(self, config: dict, transform: transforms) -> None:
         self.dataset_name = config['name']
-        self.class_names = config['class_names']
         self.img_w, self.img_h, self.img_d = config['img_w'], config['img_h'], config.get('img_d', 1)
 
         if self.dataset_name == "mnist":
@@ -24,11 +32,19 @@ class Dataset:
         else:
             raise ValueError(f'Unknown dataset name "{self.dataset_name}"')
 
-        train_data, train_targets = train_dataset.data / 255.0, train_dataset.targets
-        test_data, test_targets = test_dataset.data / 255.0, test_dataset.targets
+        train_data, train_targets = torch.tensor(train_dataset.data) / 255.0, torch.tensor(train_dataset.targets)
+        test_data, test_targets = torch.tensor(test_dataset.data) / 255.0, torch.tensor(test_dataset.targets)
+
+        if isinstance(train_data, list):
+            train_data, train_targets = torch.tensor(train_data), torch.tensor(train_targets)
+
+        if isinstance(test_data, list):
+            test_data, test_targets = torch.tensor(test_data), torch.tensor(test_targets)
 
         if self.img_d == 1:
             train_data, test_data = torch.unsqueeze(train_data, 1), torch.unsqueeze(test_data, 1)
+        else:
+            train_data, test_data = torch.moveaxis(train_data, 3, 1), torch.moveaxis(test_data, 3, 1)
 
         if "exclude_classes" in config:
             train_data, train_targets = self.__exclude_classes(config["exclude_classes"], train_data, train_targets)
@@ -42,6 +58,9 @@ class Dataset:
         if config.get("balanced", False):
             train_data, train_targets = self.__balance_dataset(train_data, train_targets)
             test_data, test_targets = self.__balance_dataset(test_data, test_targets)
+
+        if config.get("save_examples", 0):
+            self.__save_examples(train_data, train_targets, test_data, test_targets, config["save_examples"])
 
         print(f"Train shapes: data={train_data.shape}, targets={train_targets.shape}")
         print(f" Test shapes: data={test_data.shape}, targets={test_targets.shape}")
@@ -87,3 +106,12 @@ class Dataset:
         indices.sort()
 
         return data[indices], targets[indices]
+
+    def __save_examples(self, train_data: torch.tensor, train_targets: torch.tensor, test_data: torch.tensor, test_targets: torch.tensor, count: int) -> None:
+        dataset_path = os.path.join("dataset_examples", self.dataset_name)
+        os.makedirs(dataset_path, exist_ok=True)
+        class_names = DATASET_TO_CLASS_NAMES[self.dataset_name]
+
+        for i in range(count):
+            save_image(train_data[i], os.path.join(dataset_path, f"train_{i}_{class_names[train_targets[i]]}.png"))
+            save_image(test_data[i], os.path.join(dataset_path, f"test_{i}_{class_names[test_targets[i]]}.png"))

@@ -1,6 +1,6 @@
 import cv2
 import torch
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from jinja2 import Environment, FileSystemLoader
 
@@ -14,7 +14,7 @@ templates = Environment(loader=FileSystemLoader("web/templates"), cache_size=0)
 
 device = torch.device("cuda")
 model = DenseNetwork(config.INPUT_SIZE, config.SIZES, config.ACTIVATION).to(device)
-model.load("models/model_epoch10.pth")
+model.load(f'models/{config.DATASET}_{"-".join(str(size) for size in config.SIZES)}.pth')
 attack_method = SLAEAttack(model, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.IMAGE_DEPTH)
 
 
@@ -38,15 +38,13 @@ def predict(image: UploadFile = File(...)) -> JSONResponse:
 
 
 @router.post("/attack")
-def attack(input_image: UploadFile = File(...), target_image: UploadFile = File(...)) -> JSONResponse:
+def attack(input_image: UploadFile = File(...), target_image: UploadFile = File(...), scale: float = Form(...)) -> JSONResponse:
     input_image = resize_image(save_image(input_image))
     target_image = resize_image(save_image(target_image))
-    attacked_image = attack_method.attack(input_image, target_image)
+    attacked_image = attack_method.attack(input_image, target_image, scale)
 
     return JSONResponse({
         "status": "success",
         "image": numpy2base64(attacked_image),
-        "input_prediction": attack_method.predict(input_image),
-        "target_prediction": attack_method.predict(target_image),
         "prediction": attack_method.predict(attacked_image)
     })

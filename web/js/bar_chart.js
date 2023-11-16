@@ -1,7 +1,7 @@
 function BarChart(svg) {
     this.svg = svg
     this.maxRectWidth = 50
-    this.padding = {top: 10, bottom: 20, horizontal: 5}
+    this.padding = {top: 10, bottom: 70, horizontal: 5}
 }
 
 BarChart.prototype.MakeBar = function(x, y, rectWidth, rectHeight) {
@@ -20,8 +20,9 @@ BarChart.prototype.AppendLabel = function(x, y, labelText, baseline = "middle") 
     label.setAttribute("x", x)
     label.setAttribute("y", y)
     label.setAttribute("alignment-baseline", baseline)
-    label.setAttribute("text-anchor", "middle")
-    label.setAttribute("class", this.labelClass)
+    label.setAttribute("text-anchor", "start")
+    label.setAttribute("writing-mode", "tb")
+    label.setAttribute("letter-spacing", "-0.5")
     this.svg.appendChild(label)
 }
 
@@ -29,7 +30,7 @@ BarChart.prototype.AppendBar = function(x, y, rectWidth, rectHeight) {
     this.svg.appendChild(this.MakeBar(x, y, rectWidth, rectHeight))
 }
 
-BarChart.prototype.Plot = function(values, min = null, max = null) {
+BarChart.prototype.Plot = function(values, classNames, min = null, max = null) {
     this.svg.innerHTML = ''
 
     let width = this.svg.clientWidth
@@ -53,6 +54,6 @@ BarChart.prototype.Plot = function(values, min = null, max = null) {
         let y = height - this.padding.bottom - rectHeight
 
         this.AppendBar(x, y, rectWidth, rectHeight)
-        this.AppendLabel(x + rectWidth / 2, height - this.padding.bottom, `${i}`, "before-edge")
+        this.AppendLabel(x + rectWidth / 2, height - this.padding.bottom, `${classNames[i]}`)
     }
 }

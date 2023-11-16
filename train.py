@@ -17,7 +17,7 @@ def train_model(model: DenseNetwork, data_loader: data_utils.DataLoader, optimiz
         data, labels = data.to(device), labels.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = criterion(output, labels)
+        loss = criterion(torch.softmax(output, 1), labels)
         loss.backward()
         optimizer.step()
 
@@ -51,9 +51,10 @@ def main() -> None:
 
     dataset = Dataset({
         "name": config.DATASET,
-        "class_names": {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9},
+        "save_examples": 16,
         "img_w": config.IMAGE_WIDTH,
-        "img_h": config.IMAGE_HEIGHT
+        "img_h": config.IMAGE_HEIGHT,
+        "img_d": config.IMAGE_DEPTH
     }, transforms.ToTensor())
 
     dataloader_args = {'batch_size': batch_size, 'num_workers': 1, 'pin_memory': True, 'shuffle': True}
@@ -72,7 +73,7 @@ def main() -> None:
         print(f"\nEpoch {epoch}:")
         evaluate(model, data_loaders["train"], device, "train")
         evaluate(model, data_loaders["test"], device, "test")
-        model.save(f"models/model_epoch{epoch + 1}.pth")
+        model.save(f'models/{config.DATASET}_{"-".join(str(size) for size in config.SIZES)}.pth')
 
 
 if __name__ == '__main__':
