@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 from typing import Set, Tuple
 
+import numpy as np
 import torch
 import torch.utils.data as data_utils
 from torchvision import datasets, transforms
@@ -35,11 +36,11 @@ class Dataset:
         train_data, train_targets = train_dataset.data / 255.0, train_dataset.targets
         test_data, test_targets = test_dataset.data / 255.0, test_dataset.targets
 
-        if isinstance(train_data, list):
-            train_data, train_targets = torch.tensor(train_data), torch.tensor(train_targets)
+        if isinstance(train_data, np.ndarray):
+            train_data, train_targets = torch.FloatTensor(train_data), torch.tensor(train_targets)
 
-        if isinstance(test_data, list):
-            test_data, test_targets = torch.tensor(test_data), torch.tensor(test_targets)
+        if isinstance(test_data, np.ndarray):
+            test_data, test_targets = torch.FloatTensor(test_data), torch.tensor(test_targets)
 
         if self.img_d == 1:
             train_data, test_data = torch.unsqueeze(train_data, 1), torch.unsqueeze(test_data, 1)

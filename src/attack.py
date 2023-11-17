@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import torch
 from qpsolvers import solve_qp
@@ -49,7 +51,7 @@ class SLAEAttack:
             "output": output
         }
 
-    def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, scale: float) -> np.ndarray:
+    def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, scale: float) -> Optional[np.ndarray]:
         image_tensor = self.numpy2tensor(input_image)
         target_vector = self.numpy2vector(target_image)
 
@@ -69,6 +71,9 @@ class SLAEAttack:
             lb=lb, ub=ub,
             solver='ecos'
         )
+
+        if attacked_image is None:
+            return None
 
         print(np.min(attacked_image), np.max(attacked_image))
         return self.vector2numpy(attacked_image)

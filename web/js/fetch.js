@@ -25,6 +25,9 @@ async function SendRequest(url, data = null) {
         if (response.status == 404)
             return {"status": ERROR_STATUS, "message": "запрашиваемая в запросе страница не найдена (404 ошибка)"}
 
+        if (response.status == 500)
+            return {"status": ERROR_STATUS, "message": "произошла серверная ошибка (500)"}
+
         if (response?.ok)
             return await response.json()
 

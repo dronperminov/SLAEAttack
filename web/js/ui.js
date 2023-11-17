@@ -41,6 +41,7 @@ function ShowPrediction(image, block, prediction, name) {
     let imageRealSize = document.getElementById(`${name}-real-image`)
     imageRealSize.src  = `data:image/jpeg;base64,${image}`
 
+    block.parentNode.classList.remove("hidden")
     block.innerHTML = `
         <div class="text"><b>Выход сети:</b> ${ShowVector(prediction.output)}</div>
         <div class="text"><b>Выход первого слоя:</b> ${ShowVector(prediction.first_layer)}</div>
@@ -101,6 +102,7 @@ function Attack() {
     SendRequest("/attack", data).then(response => {
         if (response.status != "success") {
             error.innerText = response.message
+            prediction.parentNode.classList.add("hidden")
             return
         }
 

@@ -42,12 +42,8 @@ body {
     color: #f44336;
 }
 
-.argmin {
-    color: #0f0;
-}
-
-.argmax {
-    color: #f44336;
+.info {
+    font-size: 18px;
 }
 
 .content {

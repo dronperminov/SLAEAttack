@@ -9,6 +9,10 @@
 </head>
 <body>
     <div class="content">
+        <div class="info">
+            <div class="form-row"><b>Набор данных</b>: {{dataset}}</div>
+            <div class="form-row"><b>Модель</b>: {{model_name.replace("%s_" % dataset, "")}}</div>
+        </div>
         <div class="controls hidden" id="controls">
             <h2>Атака</h2>
             <div class="form-row">
@@ -53,7 +57,7 @@
                 <div class="prediction" id="target-prediction"></div>
             </div>
 
-            <div class="image-block">
+            <div class="image-block hidden">
                 <div class="label">Атакующее изображение</div>
                 <div class="input-image">
                     <img class="full-size-image" id="attack-image">

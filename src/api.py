@@ -12,15 +12,16 @@ router = APIRouter()
 templates = Environment(loader=FileSystemLoader("web/templates"), cache_size=0)
 
 device = torch.device("cuda")
+model_name = get_model_name()
 model = get_model().to(device)
-model.load(f'models/{get_model_name()}.pth')
+model.load(f'models/{model_name}.pth')
 attack_method = SLAEAttack(model, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.IMAGE_DEPTH)
 
 
 @router.get("/")
 def index() -> HTMLResponse:
     template = templates.get_template("index.html")
-    content = template.render(version=get_static_hash())
+    content = template.render(version=get_static_hash(), dataset=config.DATASET, model_name=model_name)
     return HTMLResponse(content=content)
 
 
@@ -46,7 +47,10 @@ def attack(input_image: UploadFile = File(...), target_image: UploadFile = File(
     elif method == "split_matrix":
         attacked_image = attack_method.split_matrix_attack(input_image, target_image)
     else:
-        return JSONResponse({"status": "error", "message": f'unknown method "{method}"'})
+        return JSONResponse({"status": "error", "message": f'неизвестный метод атаки "{method}"'})
+
+    if attacked_image is None:
+        return JSONResponse({"status": "error", "message": "не удалось провести атаку"})
 
     return JSONResponse({
         "status": "success",
