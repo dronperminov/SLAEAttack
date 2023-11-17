@@ -7,7 +7,7 @@ inline-quotes = "
 application-import-names = src, config
 import-order-style = pycharm
 
-extend-immutable-calls = File, Form
+extend-immutable-calls = File, Depends
 
 exclude = .git, __pycache__, .idea
 ignore = ANN101

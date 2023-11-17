@@ -66,16 +66,16 @@ class ConvNetwork(Network):
 
             for i in range(out_h):
                 for j in range(out_w):
-                    for y in range(fs):
-                        for x in range(fs):
-                            i0 = stride * i + y - padding
-                            j0 = stride * j + x - padding
+                    for fs_i in range(fs):
+                        for fs_j in range(fs):
+                            i0 = stride * i + fs_i - padding
+                            j0 = stride * j + fs_j - padding
 
                             if i0 < 0 or i0 >= self.img_h or j0 < 0 or j0 >= self.img_w:
                                 continue
 
                             for c in range(self.img_d):
-                                matrix[f * out_h * out_w + i * out_w + j, c * self.img_h * self.img_w + i0 * self.img_w + j0] = weight[f, c, y, x]
+                                matrix[f * out_h * out_w + i * out_w + j, c * self.img_h * self.img_w + i0 * self.img_w + j0] = weight[f, c, fs_i, fs_j]
 
         output = output.reshape(output_size)
         x_vec = torch.flatten(x).cpu()
