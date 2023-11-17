@@ -18,6 +18,8 @@ class AttackForm:
     method: str = Form(...)
     ignore_target: bool = Form(...)
     scale: float = Form(...)
+    mask: str = Form(...)
+    pixel_diff: int = Form(...)
 
 
 router = APIRouter()
@@ -55,7 +57,7 @@ def attack(params: AttackForm = Depends()) -> JSONResponse:
     target_image = resize_image(save_image(params.target_image))
 
     if params.method == "qp":
-        attacked_image = attack_method.qp_attack(input_image, target_image, params.ignore_target, params.scale)
+        attacked_image = attack_method.qp_attack(input_image, target_image, params.ignore_target, params.scale, params.pixel_diff, params.mask)
     elif params.method == "split_matrix":
         attacked_image = attack_method.split_matrix_attack(input_image, target_image, params.ignore_target)
     else:

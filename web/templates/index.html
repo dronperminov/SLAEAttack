@@ -25,8 +25,21 @@
             <div class="form-row">
                 <label>Игнонировать целевое изображение: <input type="checkbox" id="ignore-target" onchange="UpdateIgnoreTarget()"></label>
             </div>
-            <div class="form-row" id="scale-block">
-                <label>Доля совпадающих пикселей: <input type="range" min="0" max="1" step="0.01" value="0" id="scale" onchange="Attack()" oninput="UpdateScaleLabel()"></label> <span id="scale-value">0%</span>
+            <div id="qp-params-block">
+                <div class="form-row">
+                    <label>Форма маски: <select id="mask">
+                        <option value="random" selected>Случайная</option>
+                        <option value="spiral">Спираль</option>
+                    </select></label>
+                </div>
+
+                <div class="form-row">
+                    <label>Доля совпадающих пикселей: <input type="range" min="0" max="1" step="0.01" value="0" id="scale" oninput="UpdateLabel('scale', true)"></label> <span id="scale-value">0%</span>
+                </div>
+
+                <div class="form-row">
+                    <label>Разность пикселей: <input type="range" min="0" max="25" step="1" value="5" id="pixel-diff" oninput="UpdateLabel('pixel-diff')"></label> <span id="pixel-diff-value">5</span>
+                </div>
             </div>
 
             <button onclick="Attack()">Атаковать</button>

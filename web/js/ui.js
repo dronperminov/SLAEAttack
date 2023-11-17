@@ -3,20 +3,24 @@ function SelectImage(name) {
     input.click()
 }
 
-function UpdateScaleLabel() {
-    let scale = +document.getElementById("scale").value
-    let scaleValue = document.getElementById("scale-value")
-    scaleValue.innerText = `${Math.round(scale * 10000) / 100}%`
+function UpdateLabel(name, percent = false) {
+    let value = +document.getElementById(name).value
+    let span = document.getElementById(`${name}-value`)
+
+    if (percent)
+        span.innerText = `${Math.round(value * 10000) / 100}%`
+    else
+        span.innerText = `${value}`
 }
 
 function UpdateIgnoreTarget() {
     let ignoreTarget = document.getElementById("ignore-target").checked
-    let scaleBlock = document.getElementById("scale-block")
+    let paramsBlock = document.getElementById("qp-params-block")
 
     if (ignoreTarget)
-        scaleBlock.classList.add("hidden")
+        paramsBlock.classList.add("hidden")
     else
-        scaleBlock.classList.remove("hidden")
+        paramsBlock.classList.remove("hidden")
 }
 
 function ShowAttackButton() {
@@ -73,12 +77,12 @@ function ShowPrediction(image, block, prediction, name) {
 
 function ChangeMethod() {
     let method = document.getElementById("method").value
-    let scaleBlock = document.getElementById("scale-block")
+    let paramsBlock = document.getElementById("qp-params-block")
 
     if (method == "qp")
-        scaleBlock.classList.remove("hidden")
+        paramsBlock.classList.remove("hidden")
     else
-        scaleBlock.classList.add("hidden")
+        paramsBlock.classList.add("hidden")
 }
 
 function Predict(name) {
@@ -108,6 +112,8 @@ function Attack() {
     let method = document.getElementById("method").value
     let ignoreTarget = document.getElementById("ignore-target").checked
     let scale = +document.getElementById("scale").value
+    let mask = document.getElementById("mask").value
+    let pixelDiff = +document.getElementById("pixel-diff").value
     let error = document.getElementById("error")
     error.innerText = ""
 
@@ -116,6 +122,8 @@ function Attack() {
     data.append("target_image", document.getElementById("target-file").files[0])
     data.append("scale", scale)
     data.append("ignore_target", ignoreTarget)
+    data.append("mask", mask)
+    data.append("pixel_diff", pixelDiff)
     data.append("method", method)
 
     SendRequest("/attack", data).then(response => {

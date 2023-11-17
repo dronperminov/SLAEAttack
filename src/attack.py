@@ -53,7 +53,7 @@ class SLAEAttack:
             "output": output
         }
 
-    def __get_spiral_mask(self, spiral_size):
+    def __get_spiral_mask(self, spiral_size: int) -> np.ndarray:
         mask = np.full((self.image_height, self.image_width), True)
         pnt = np.zeros(2, dtype=np.int32)
         direct = 0
@@ -67,7 +67,7 @@ class SLAEAttack:
             pnt = pnt_to
         return mask.reshape(self.size)
 
-    def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, ignore_target: bool, scale: float, pixel_diff: int = 3) -> Optional[np.ndarray]:
+    def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, ignore_target: bool, scale: float, diff: int, mask_type: str) -> Optional[np.ndarray]:
         image_tensor = self.numpy2tensor(input_image)
         target_vector = self.numpy2vector(target_image)
 
@@ -82,10 +82,14 @@ class SLAEAttack:
         else:
             p = np.eye(self.size, self.size).astype(np.float64)
             q = -target_vector.astype(np.float64)
-            mask = self.__get_spiral_mask(int((1 - scale) * self.size))
-            #mask = np.random.choice([True, False], size=self.size, p=[scale, 1 - scale])
-            lb[mask] = np.clip(target_vector[mask] - pixel_diff / 255, 0, 1)
-            ub[mask] = np.clip(target_vector[mask] + pixel_diff / 255, 0, 1)
+
+            if mask_type == "spiral":
+                mask = self.__get_spiral_mask(int((1 - scale) * self.size))
+            else:
+                mask = np.random.choice([True, False], size=self.size, p=[scale, 1 - scale])
+
+            lb[mask] = np.clip(target_vector[mask] - diff / 255, 0, 1)
+            ub[mask] = np.clip(target_vector[mask] + diff / 255, 0, 1)
 
         attacked_image = solve_qp(P=p, q=q, A=matrix, b=b, lb=lb, ub=ub, solver='ecos')
 
