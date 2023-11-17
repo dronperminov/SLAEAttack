@@ -14,10 +14,11 @@ function UpdateLabel(name, percent = false) {
 }
 
 function UpdateIgnoreTarget() {
+    let method = document.getElementById("method").value
     let ignoreTarget = document.getElementById("ignore-target").checked
     let paramsBlock = document.getElementById("qp-params-block")
 
-    if (ignoreTarget)
+    if (ignoreTarget || method != "qp")
         paramsBlock.classList.add("hidden")
     else
         paramsBlock.classList.remove("hidden")

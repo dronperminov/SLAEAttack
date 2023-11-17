@@ -53,18 +53,31 @@ class SLAEAttack:
             "output": output
         }
 
-    def __get_spiral_mask(self, spiral_size: int) -> np.ndarray:
-        mask = np.full((self.image_height, self.image_width), True)
+    def __get_spiral_mask(self, scale: float) -> np.ndarray:
+        spiral_size = int((1 - scale) * self.image_height * self.image_width)
+        mask = np.full((self.image_depth, self.image_height, self.image_width), True)
         pnt = np.zeros(2, dtype=np.int32)
         direct = 0
         directions = np.array([[0, 1], [1, 0], [0, -1], [-1, 0]])
+
         for _ in range(spiral_size):
-            mask[pnt[0]][pnt[1]] = False
+            mask[:, pnt[0], pnt[1]] = False
             pnt_to = pnt + directions[direct]
-            if pnt_to[0] < 0 or pnt_to[0] >= self.image_height or pnt_to[1] < 0 or pnt_to[1] >= self.image_width or not mask[pnt_to[0]][pnt_to[1]]:
+
+            if pnt_to[0] < 0 or pnt_to[0] >= self.image_height or pnt_to[1] < 0 or pnt_to[1] >= self.image_width or not mask[0, pnt_to[0], pnt_to[1]]:
                 direct = direct + 1 if direct < 3 else 0
                 pnt_to = pnt + directions[direct]
+
             pnt = pnt_to
+
+        return mask.reshape(self.size)
+
+    def __get_random_mask(self, scale: float) -> np.ndarray:
+        mask = np.random.choice([True, False], size=(self.image_height, self.image_width), p=[scale, 1 - scale])
+
+        if config.IMAGE_DEPTH == 3:
+            mask = np.concatenate([mask, mask, mask])
+
         return mask.reshape(self.size)
 
     def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, ignore_target: bool, scale: float, diff: int, mask_type: str) -> Optional[np.ndarray]:
@@ -84,9 +97,9 @@ class SLAEAttack:
             q = -target_vector.astype(np.float64)
 
             if mask_type == "spiral":
-                mask = self.__get_spiral_mask(int((1 - scale) * self.size))
+                mask = self.__get_spiral_mask(scale)
             else:
-                mask = np.random.choice([True, False], size=self.size, p=[scale, 1 - scale])
+                mask = self.__get_random_mask(scale)
 
             lb[mask] = np.clip(target_vector[mask] - diff / 255, 0, 1)
             ub[mask] = np.clip(target_vector[mask] + diff / 255, 0, 1)
