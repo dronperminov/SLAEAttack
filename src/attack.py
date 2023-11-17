@@ -47,11 +47,13 @@ class SLAEAttack:
         output = self.model(torch_input)[0].detach().cpu().numpy().tolist()
         return {
             "class_names": DATASET_TO_CLASS_NAMES[config.DATASET],
+            "x_min": torch.min(torch_input).item(),
+            "x_max": torch.max(torch_input).item(),
             "first_layer": first_layer,
             "output": output
         }
 
-    def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, scale: float) -> Optional[np.ndarray]:
+    def qp_attack(self, input_image: np.ndarray, target_image: np.ndarray, ignore_target: bool, scale: float) -> Optional[np.ndarray]:
         image_tensor = self.numpy2tensor(input_image)
         target_vector = self.numpy2vector(target_image)
 
@@ -60,17 +62,17 @@ class SLAEAttack:
         lb = np.zeros(self.size, dtype=np.float64)
         ub = np.ones(self.size, dtype=np.float64)
 
-        mask = np.random.choice([True, False], size=self.size, p=[scale, 1 - scale])
-        lb[mask] = target_vector[mask]
-        ub[mask] = target_vector[mask]
+        if ignore_target:
+            p = np.diag(np.random.uniform(0.001, 1, self.size))
+            q = np.random.uniform(0, 1, self.size)
+        else:
+            p = np.eye(self.size, self.size).astype(np.float64)
+            q = -target_vector.astype(np.float64)
+            mask = np.random.choice([True, False], size=self.size, p=[scale, 1 - scale])
+            lb[mask] = target_vector[mask]
+            ub[mask] = target_vector[mask]
 
-        attacked_image = solve_qp(
-            P=np.eye(self.size, self.size).astype(np.float64),
-            q=-target_vector.astype(np.float64),
-            A=matrix, b=b,
-            lb=lb, ub=ub,
-            solver='ecos'
-        )
+        attacked_image = solve_qp(P=p, q=q, A=matrix, b=b, lb=lb, ub=ub, solver='ecos')
 
         if attacked_image is None:
             return None
@@ -78,14 +80,14 @@ class SLAEAttack:
         print(np.min(attacked_image), np.max(attacked_image))
         return self.vector2numpy(attacked_image)
 
-    def split_matrix_attack(self, input_image: np.ndarray, target_image: np.ndarray) -> np.ndarray:
+    def split_matrix_attack(self, input_image: np.ndarray, target_image: np.ndarray, ignore_target: bool) -> np.ndarray:
         input_tensor = self.numpy2tensor(input_image)
         matrix, b = self.model.get_slae(input_tensor, to_numpy=True)
 
         indices = np.random.choice(range(matrix.shape[1]), matrix.shape[0], replace=False)
         other_indices = np.array([i for i in range(matrix.shape[1]) if i not in indices])
 
-        x = self.numpy2vector(target_image)
+        x = np.random.uniform(0, 1, self.size) if ignore_target else self.numpy2vector(target_image)
         x_changed = np.linalg.solve(matrix[:, indices], (b.T - np.matmul(matrix[:, other_indices], x[other_indices])))
         x[indices] = x_changed
         print(x_changed)

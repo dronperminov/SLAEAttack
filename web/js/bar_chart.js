@@ -33,6 +33,9 @@ BarChart.prototype.AppendBar = function(x, y, rectWidth, rectHeight) {
 BarChart.prototype.Plot = function(values, classNames, min = null, max = null) {
     this.svg.innerHTML = ''
 
+    if (Math.max(...classNames.map(name => name.length)) < 3)
+        this.padding.bottom = 10
+
     let width = this.svg.clientWidth
     let height = this.svg.clientHeight
     let rectWidth = width / values.length - this.padding.horizontal

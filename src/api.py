@@ -1,12 +1,24 @@
+from dataclasses import dataclass
+
 import cv2
 import torch
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from jinja2 import Environment, FileSystemLoader
 
 import config
 from src.attack import SLAEAttack
 from src.utils import get_model, get_model_name, get_static_hash, numpy2base64, resize_image, save_image
+
+
+@dataclass
+class AttackForm:
+    input_image: UploadFile = File(...)
+    target_image: UploadFile = File(...)
+    method: str = Form(...)
+    ignore_target: bool = Form(...)
+    scale: float = Form(...)
+
 
 router = APIRouter()
 templates = Environment(loader=FileSystemLoader("web/templates"), cache_size=0)
@@ -38,16 +50,16 @@ def predict(image: UploadFile = File(...)) -> JSONResponse:
 
 
 @router.post("/attack")
-def attack(input_image: UploadFile = File(...), target_image: UploadFile = File(...), method: str = Form(...), scale: float = Form(...)) -> JSONResponse:
-    input_image = resize_image(save_image(input_image))
-    target_image = resize_image(save_image(target_image))
+def attack(params: AttackForm = Depends()) -> JSONResponse:
+    input_image = resize_image(save_image(params.input_image))
+    target_image = resize_image(save_image(params.target_image))
 
-    if method == "qp":
-        attacked_image = attack_method.qp_attack(input_image, target_image, scale)
-    elif method == "split_matrix":
-        attacked_image = attack_method.split_matrix_attack(input_image, target_image)
+    if params.method == "qp":
+        attacked_image = attack_method.qp_attack(input_image, target_image, params.ignore_target, params.scale)
+    elif params.method == "split_matrix":
+        attacked_image = attack_method.split_matrix_attack(input_image, target_image, params.ignore_target)
     else:
-        return JSONResponse({"status": "error", "message": f'неизвестный метод атаки "{method}"'})
+        return JSONResponse({"status": "error", "message": f'неизвестный метод атаки "{params.method}"'})
 
     if attacked_image is None:
         return JSONResponse({"status": "error", "message": "не удалось провести атаку"})
