@@ -6,6 +6,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from uvicorn.config import LOGGING_CONFIG
 
+import config
 from src.api import router as api_router
 
 app = FastAPI()
@@ -24,7 +25,7 @@ def main() -> None:
     LOGGING_CONFIG["formatters"]["access"]["datefmt"] = "%Y-%m-%d %H:%M:%S"
 
     host = os.getenv("SLAE_ATTACK_HOST", "0.0.0.0")
-    port = int(os.getenv("SLAE_ATTACK_PORT", "8931"))
+    port = int(os.getenv("SLAE_ATTACK_PORT", config.PORT))
     uvicorn.run(app, host=host, port=port)
 
 
