@@ -16,12 +16,12 @@ function UpdateLabel(name, percent = false) {
 function UpdateIgnoreTarget() {
     let method = document.getElementById("method").value
     let ignoreTarget = document.getElementById("ignore-target").checked
-    let paramsBlock = document.getElementById("qp-params-block")
+    let qpParamsBlock = document.getElementById("qp-params-block")
 
-    if (ignoreTarget || method != "qp")
-        paramsBlock.classList.add("hidden")
+    if (ignoreTarget || method == "split_matrix")
+        qpParamsBlock.classList.add("hidden")
     else
-        paramsBlock.classList.remove("hidden")
+        qpParamsBlock.classList.remove("hidden")
 }
 
 function ShowAttackButton() {
@@ -78,12 +78,18 @@ function ShowPrediction(image, block, prediction, name) {
 
 function ChangeMethod() {
     let method = document.getElementById("method").value
-    let paramsBlock = document.getElementById("qp-params-block")
+    let qpParamsBlock = document.getElementById("qp-params-block")
+    let layersParamsBlock = document.getElementById("multilayer-params-block")
 
-    if (method == "qp")
-        paramsBlock.classList.remove("hidden")
+    if (method == "qp" || method == "multi-layers")
+        qpParamsBlock.classList.remove("hidden")
     else
-        paramsBlock.classList.add("hidden")
+        qpParamsBlock.classList.add("hidden")
+
+    if (method == "multi-layers")
+        layersParamsBlock.classList.remove("hidden")
+    else
+        layersParamsBlock.classList.add("hidden")
 }
 
 function Predict(name) {
@@ -107,6 +113,9 @@ function Predict(name) {
 }
 
 function Attack() {
+    let btn = document.getElementById("attack-btn")
+    btn.setAttribute("disabled", "")
+
     let image = document.getElementById("attack-image")
     let imageRealSize = document.getElementById("attack-real-image")
     let prediction = document.getElementById("attack-prediction")
@@ -115,6 +124,8 @@ function Attack() {
     let scale = +document.getElementById("scale").value
     let mask = document.getElementById("mask").value
     let pixelDiff = +document.getElementById("pixel-diff").value
+    let signsP = +document.getElementById("signs-p").value
+    let target = document.getElementById("target").value
     let error = document.getElementById("error")
     error.innerText = ""
 
@@ -125,9 +136,13 @@ function Attack() {
     data.append("ignore_target", ignoreTarget)
     data.append("mask", mask)
     data.append("pixel_diff", pixelDiff)
+    data.append("signs_p", signsP)
+    data.append("target", target)
     data.append("method", method)
 
     SendRequest("/attack", data).then(response => {
+        btn.removeAttribute("disabled")
+
         if (response.status != "success") {
             error.innerText = response.message
             prediction.parentNode.classList.add("hidden")

@@ -20,6 +20,8 @@ class AttackForm:
     scale: float = Form(...)
     mask: str = Form(...)
     pixel_diff: int = Form(...)
+    signs_p: float = Form(0)
+    target: str = Form(...)
 
 
 router = APIRouter()
@@ -28,7 +30,7 @@ templates = Environment(loader=FileSystemLoader("web/templates"), cache_size=0)
 device = torch.device("cuda")
 model_name = get_model_name()
 model = get_model().to(device)
-model.load(f'models/{model_name}.pth')
+model.load(f'models/{config.ACTIVATION}/{model_name}.pth')
 attack_method = SLAEAttack(model, config.IMAGE_WIDTH, config.IMAGE_HEIGHT, config.IMAGE_DEPTH)
 
 
@@ -60,6 +62,8 @@ def attack(params: AttackForm = Depends()) -> JSONResponse:
         attacked_image = attack_method.qp_attack(input_image, target_image, params.ignore_target, params.scale, params.pixel_diff, params.mask)
     elif params.method == "split_matrix":
         attacked_image = attack_method.split_matrix_attack(input_image, target_image, params.ignore_target)
+    elif params.method == "multi-layers":
+        attacked_image = attack_method.milti_layers_attack(input_image, target_image, params.ignore_target, params.scale, params.pixel_diff, params.mask, params.signs_p, params.target)
     else:
         return JSONResponse({"status": "error", "message": f'неизвестный метод атаки "{params.method}"'})
 

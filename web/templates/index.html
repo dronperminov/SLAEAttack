@@ -17,8 +17,9 @@
             <h2>Атака</h2>
             <div class="form-row">
                 <label>Вид атаки: <select id="method" onchange="ChangeMethod()">
-                    <option value="qp" selected>QP решатель</option>
+                    <option value="qp">QP решатель</option>
                     <option value="split_matrix">СЛАУ</option>
+                    <option value="multi-layers" selected>многослойная</option>
                 </select></label>
 
             </div>
@@ -40,9 +41,23 @@
                 <div class="form-row">
                     <label>Разность пикселей: <input type="range" min="0" max="25" step="1" value="5" id="pixel-diff" oninput="UpdateLabel('pixel-diff')"></label> <span id="pixel-diff-value">5</span>
                 </div>
+
             </div>
 
-            <button onclick="Attack()">Атаковать</button>
+            <div id="multilayer-params-block">
+                <div class="form-row">
+                    <label>Вероятность смены знаков: <input type="range" min="0" max="1" step="0.01" value="0" id="signs-p" oninput="UpdateLabel('signs-p', true)"></label> <span id="signs-p-value">0%</span>
+                </div>
+
+                <div class="form-row">
+                    <label>Цель: <select id="target">
+                        <option value="values" selected>Значения</option>
+                        <option value="class">Класс</option>
+                    </select></label>
+                </div>
+            </div>
+
+            <button onclick="Attack()" id="attack-btn">Атаковать</button>
         </div>
         <div class="error" id="error"></div>
 

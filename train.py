@@ -74,7 +74,7 @@ def main() -> None:
         print(f"\nEpoch {epoch}:")
         evaluate(model, data_loaders["train"], device, "train")
         evaluate(model, data_loaders["test"], device, "test")
-        model.save(f'models/{get_model_name()}.pth')
+        model.save(f'models/{config.ACTIVATION}/{get_model_name()}.pth')
 
 
 if __name__ == '__main__':

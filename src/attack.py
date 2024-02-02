@@ -1,12 +1,14 @@
 from typing import Optional
 
 import numpy as np
+import qpsolvers
 import torch
 from qpsolvers import solve_qp
 
 import config
 from src.dataset import DATASET_TO_CLASS_NAMES
 from src.networks.network import Network
+from scipy.optimize import linprog
 
 
 class SLAEAttack:
@@ -124,3 +126,55 @@ class SLAEAttack:
         x[indices] = x_changed
         print(x_changed)
         return self.vector2numpy(x)
+
+    def milti_layers_attack(self, input_image: np.ndarray, target_image: np.ndarray, ignore_target: bool, scale: float, diff: int, mask_type: str, signs_p: float, target: str) -> np.ndarray:
+        image_tensor = self.numpy2tensor(input_image)
+        target_vector = self.numpy2vector(target_image)
+
+        lb = np.zeros(self.size, dtype=np.float64)
+        ub = np.ones(self.size, dtype=np.float64)
+
+        if ignore_target:
+            p = np.diag(np.random.uniform(0.001, 1, self.size))
+            q = np.random.uniform(0, 1, self.size)
+        else:
+            p = np.eye(self.size, self.size).astype(np.float64)
+            q = -target_vector.astype(np.float64)
+
+            if mask_type == "spiral":
+                mask = self.__get_spiral_mask(scale)
+            else:
+                mask = self.__get_random_mask(scale)
+
+            lb[mask] = np.clip(target_vector[mask] - diff / 255, 0, 1)
+            ub[mask] = np.clip(target_vector[mask] + diff / 255, 0, 1)
+
+        matrices, biases, signs, y = self.model.get_matrices(image_tensor, signs_p)
+
+        G = np.concatenate([-matrix * sign[:, None] for matrix, sign in zip(matrices[:-1], signs[:-1])])
+        h = np.concatenate([bias * sign for bias, sign in zip(biases[:-1], signs[:-1])])
+
+        if target == "values":
+            A = matrices[-1]
+            b = y[-1] - biases[-1]
+
+            attacked_image = solve_qp(P=p, q=q, A=A, b=b, G=G, h=h, lb=lb, ub=ub, solver='scs')
+        elif target == "class":
+            target_class = np.argmax(y[-1])
+            y_lower = np.zeros_like(y[-1]) - 100
+            y_upper = np.zeros_like(y[-1])
+            y_lower[target_class] = 2
+            y_upper[target_class] = 20
+
+            matrix = np.concatenate([G, -matrices[-1], matrices[-1]], axis=0)
+            vector = np.concatenate([h, -(y_lower - biases[-1]), y_upper - biases[-1]])
+
+            attacked_image = solve_qp(P=p, q=q, G=matrix, h=vector, lb=lb, ub=ub, solver='scs')
+        else:
+            raise ValueError(f'Unknown target "{target}"')
+
+        if attacked_image is None:
+            return None
+
+        print(np.min(attacked_image), np.max(attacked_image))
+        return self.vector2numpy(attacked_image)
